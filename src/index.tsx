@@ -1,4 +1,10 @@
 import React from 'react';
 import { render } from 'react-dom';
 
-render(<h1>React reactivity.</h1>, document.getElementById('app'));
+import ClickCounter from './ClickCounter';
+
+/**
+ * @description
+ * React использует reference, чтобы создать новый instance компонента
+ */
+render(<ClickCounter />, document.getElementById('app'));
