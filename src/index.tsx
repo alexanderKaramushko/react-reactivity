@@ -1,4 +1,27 @@
-import React from 'react';
-import { render } from 'react-dom';
+import React, { ReactElement } from 'react';
+import { render } from './utils';
 
-render(<h1>React reactivity.</h1>, document.getElementById('app'));
+/**
+ * Functional Composite component
+ */
+const Input = (): ReactElement => <input type="text" />;
+
+/**
+ * Class Composite component
+ */
+export default class App extends React.PureComponent {
+
+  render(): ReactElement {
+    return (
+      /** Host component */
+      <div>
+        <Input />
+      </div>
+    );
+  }
+
+}
+
+const rootEl = document.getElementById('app');
+
+render(<App />, rootEl);
