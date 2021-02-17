@@ -1,3 +1,5 @@
+/* eslint-disable no-continue */
+/* eslint-disable no-prototype-builtins */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import { instantiateComponent } from './utils';
 
@@ -58,6 +60,115 @@ class DOMComponent {
     const { renderedChildren } = this;
 
     renderedChildren.forEach((child) => child.unmount());
+  }
+
+  receive(nextElement) {
+    const prevElement = this.currentElement;
+    const prevProps = prevElement.props;
+    const nextProps = nextElement.props;
+
+    this.currentElement = nextElement;
+
+    Object.keys(prevProps).forEach((propName) => {
+      if (propName !== 'children' && !nextProps.hasOwnProperty(propName)) {
+        this.node.removeAttribute(propName);
+      }
+    });
+
+    Object.keys(nextProps).forEach((propName) => {
+      if (propName !== 'children') {
+        this.node.setAttribute(propName, nextProps[propName]);
+      }
+    });
+
+    let prevChildren = prevProps.children || [];
+
+    if (!Array.isArray(prevChildren)) {
+      prevChildren = [prevChildren];
+    }
+
+    let nextChildren = nextProps.children || [];
+
+    if (!Array.isArray(nextChildren)) {
+      nextChildren = [nextChildren];
+    }
+
+    const prevRenderedChildren = this.renderedChildren;
+    const nextRenderedChildren = [];
+
+    const operationQueue = [];
+
+    for (let i = 0; i < nextChildren.length; i += 1) {
+      const prevChild = prevRenderedChildren[i];
+
+      /**
+       * Добавляем новый элемент, если нет соответствия предыдущих и новых потомков
+       */
+      if (!prevChild) {
+        const nextChild = instantiateComponent(nextChildren[i]);
+        const node = nextChild.mount();
+
+        operationQueue.push({ node, type: 'ADD' });
+        nextRenderedChildren.push(nextChild);
+        continue;
+      }
+
+      const canUpdate = prevChildren[i].type === nextChildren[i].type;
+
+      /**
+       * Заменяем старый элемент, если разные типы
+       */
+      if (!canUpdate) {
+        const prevNode = prevChild.getHostNode();
+
+        prevChild.unmount();
+
+        const nextChild = instantiateComponent(nextChildren[i]);
+        const nextNode = nextChild.mount();
+
+        operationQueue.push({ nextNode, prevNode, type: 'REPLACE' });
+        nextRenderedChildren.push(nextChild);
+        continue;
+      }
+
+      prevChild.receive(nextChildren[i]);
+      nextRenderedChildren.push(prevChild);
+    }
+
+    /**
+     * Удаляем лишние элементы
+     */
+    for (let j = nextChildren.length; j < prevChildren.length; j += 1) {
+      const prevChild = prevRenderedChildren[j];
+      const node = prevChild.getHostNode();
+
+      prevChild.unmount();
+
+      operationQueue.push({ node, type: 'REMOVE' });
+    }
+
+    this.renderedChildren = nextRenderedChildren;
+
+    /**
+     * Обновляем всех потомков за один проход
+     */
+    while (operationQueue.length > 0) {
+      const operation = operationQueue.shift();
+
+      switch (operation.type) {
+        case 'ADD':
+          this.node.appendChild(operation.node);
+          break;
+        case 'REPLACE':
+          this.node.replaceChild(operation.nextNode, operation.prevNode);
+          break;
+        case 'REMOVE':
+          this.node.removeChild(operation.node);
+          break;
+        default:
+          break;
+      }
+    }
   }
 
 }

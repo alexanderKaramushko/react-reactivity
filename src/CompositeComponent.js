@@ -14,6 +14,10 @@ class CompositeComponent {
     this.publicInstance = null;
   }
 
+  getHostNode() {
+    return this.renderedComponent.getHostNode();
+  }
+
   getPublicInstance() {
     return this.publicInstance;
   }
@@ -63,10 +67,56 @@ class CompositeComponent {
       }
     }
 
-    // Unmount the single rendered component
     const { renderedComponent } = this;
 
     renderedComponent.unmount();
+  }
+
+  receive(nextElement) {
+    const { publicInstance } = this;
+    const prevRenderedComponent = this.renderedComponent;
+    const prevRenderedElement = prevRenderedComponent.currentElement;
+
+    this.currentElement = nextElement;
+
+    const { type } = nextElement;
+    const nextProps = nextElement.props;
+
+    let nextRenderedElement;
+
+    /**
+     * Рендерим элемент с новыми пропсами
+     */
+    if (isClass(type)) {
+      if (publicInstance.componentWillUpdate) {
+        publicInstance.componentWillUpdate(nextProps);
+      }
+      publicInstance.props = nextProps;
+      nextRenderedElement = publicInstance.render();
+    } else if (typeof type === 'function') {
+      nextRenderedElement = type(nextProps);
+    }
+
+    /**
+     * Обновляем элементы с одинаковыми типами
+     */
+    if (prevRenderedElement.type === nextRenderedElement.type) {
+      prevRenderedComponent.receive(nextRenderedElement);
+      return;
+    }
+
+    const prevNode = prevRenderedComponent.getHostNode();
+
+    prevRenderedComponent.unmount();
+    const nextRenderedComponent = instantiateComponent(nextRenderedElement);
+    const nextNode = nextRenderedComponent.mount();
+
+    this.renderedComponent = nextRenderedComponent;
+
+    /**
+     * Заменяем элементы с разными типами
+     */
+    prevNode.parentNode.replaceChild(nextNode, prevNode);
   }
 
 }

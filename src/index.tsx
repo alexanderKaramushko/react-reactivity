@@ -1,20 +1,19 @@
 /* eslint-disable no-console */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
 import React, { ReactElement } from 'react';
-import { render, unmountTree } from './utils';
-
-/**
- * Functional Composite component
- */
-const Input = (): ReactElement => <input type="text" />;
+import { render } from './utils';
 
 /**
  * Class Composite component
  */
-export default class App extends React.PureComponent {
+export default class App extends React.Component<{ placeholder?: string }> {
 
   componentWillMount() {
     console.log('App will mount');
+  }
+
+  componentWillUpdate() {
+    console.log('App will update with props');
   }
 
   componentWillUnmount() {
@@ -22,10 +21,12 @@ export default class App extends React.PureComponent {
   }
 
   render(): ReactElement {
+    const { placeholder = '' } = this.props;
+
     return (
       /** Host component */
       <div>
-        <Input />
+        <input type="text" placeholder={placeholder} />
       </div>
     );
   }
@@ -36,6 +37,6 @@ const rootEl = document.getElementById('app');
 
 render(<App />, rootEl);
 
-setTimeout(() => {
-  unmountTree(rootEl);
-}, 1000);
+// render(<App placeholder="Placeholder" />, rootEl);
+
+// render(<Input />, rootEl);

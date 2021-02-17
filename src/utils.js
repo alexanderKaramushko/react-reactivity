@@ -1,3 +1,4 @@
+/* eslint-disable consistent-return */
 /* eslint-disable no-param-reassign */
 /* eslint-disable no-underscore-dangle */
 /* eslint-disable @typescript-eslint/explicit-function-return-type */
@@ -58,6 +59,18 @@ export function unmountTree(containerNode) {
  */
 export function render(element, containerNode) {
   if (containerNode.firstChild) {
+    const prevNode = containerNode.firstChild;
+    const prevRootComponent = prevNode._internalInstance;
+    const prevElement = prevRootComponent.currentElement;
+
+    /**
+     * Рекурсивно обновить элементы одного типа
+     */
+    if (prevElement.type === element.type) {
+      prevRootComponent.receive(element);
+      return;
+    }
+
     unmountTree(containerNode);
   }
 
