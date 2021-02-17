@@ -48,9 +48,25 @@ class CompositeComponent {
      * Рекурсивный проход по вложенным компонентам
      */
     const renderedComponent = instantiateComponent(renderedElement);
+
     this.renderedComponent = renderedComponent;
 
     return renderedComponent.mount();
+  }
+
+  unmount() {
+    const { publicInstance } = this;
+
+    if (publicInstance) {
+      if (publicInstance.componentWillUnmount) {
+        publicInstance.componentWillUnmount();
+      }
+    }
+
+    // Unmount the single rendered component
+    const { renderedComponent } = this;
+
+    renderedComponent.unmount();
   }
 
 }

@@ -41,15 +41,23 @@ class DOMComponent {
      * Рекурсивный проход по вложенным компонентам
      */
     const renderedChildren = children.map(instantiateComponent);
+
     this.renderedChildren = renderedChildren;
 
     /**
      * Отрендерить вложенные компоненты
      */
     const childNodes = renderedChildren.map((child) => child.mount());
+
     childNodes.forEach((childNode) => node.appendChild(childNode));
 
     return node;
+  }
+
+  unmount() {
+    const { renderedChildren } = this;
+
+    renderedChildren.forEach((child) => child.unmount());
   }
 
 }
