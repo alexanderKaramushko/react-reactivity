@@ -1,4 +1,17 @@
-import React from 'react';
-import { render } from 'react-dom';
+function walkAndUpdate(DOMElement: Element | null): void {
+  if (!DOMElement) {
+    return;
+  }
 
-render(<h1>React reactivity.</h1>, document.getElementById('app'));
+  const { children = [] } = DOMElement;
+
+  DOMElement.insertAdjacentHTML('beforebegin', '<span>Updating...</span>');
+
+  Array.from(children).forEach(walkAndUpdate);
+}
+
+const trigger: HTMLInputElement | null = document.querySelector('.trigger');
+
+trigger?.addEventListener('input', () => {
+  walkAndUpdate(document.querySelector('.list'));
+});
