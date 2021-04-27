@@ -1,4 +1,9 @@
-import React from 'react';
-import { render } from 'react-dom';
+// @ts-nocheck
 
-render(<h1>React reactivity.</h1>, document.getElementById('app'));
+import React from 'react';
+// eslint-disable-next-line @typescript-eslint/camelcase
+import { unstable_createRoot } from 'react-dom';
+
+import Posts from './Posts/Posts';
+
+unstable_createRoot(document.getElementById('app')).render(<Posts />);
