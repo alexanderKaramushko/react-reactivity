@@ -16,10 +16,10 @@ const Post: FC<any> = (props): ReactElement => {
 
       <div style={{ paddingLeft: 14 }}>
         {postComments.map((postComment) => (
-          <>
+          <div key={postComment.id}>
             <h3>{postComment.name}</h3>
             <p>{postComment.body}</p>
-          </>
+          </div>
         ))}
       </div>
     </div>
