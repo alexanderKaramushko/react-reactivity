@@ -74,7 +74,7 @@ class ClickCounter extends React.Component<ClickCounterProps, ClickCounterState>
   }
 
   /**
-   * @description React elements
+   * @description React component
    * {
    *  type: 'div',
    *  props: {
